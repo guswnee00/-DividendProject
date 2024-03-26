@@ -1,17 +1,22 @@
 package zerobase.dividendproject.web;
 
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
+import zerobase.dividendproject.model.Company;
+import zerobase.dividendproject.service.CompanyService;
 
 @RestController
 @RequestMapping("/company")
+@AllArgsConstructor
 public class CompanyController {
+
+    private final CompanyService companyService;
 
     // 자동완성을 위한 API
     @GetMapping("/autocomplete")
-    public ResponseEntity<?> autocomplete(
-            @RequestParam String keyword
-    ) {
+    public ResponseEntity<?> autocomplete(@RequestParam String keyword) {
         return null;
     }
 
@@ -23,8 +28,14 @@ public class CompanyController {
 
     // 회사 저장
     @PostMapping
-    public ResponseEntity<?> addCompany() {
-        return null;
+    public ResponseEntity<?> addCompany(@RequestBody Company request) {
+        String ticker = request.getTicker().trim();
+        if (ObjectUtils.isEmpty(ticker)) {
+            throw new RuntimeException("ticker is empty");
+        }
+
+        Company company = this.companyService.save(ticker);
+        return ResponseEntity.ok(company);
     }
 
     // 회사 삭제
