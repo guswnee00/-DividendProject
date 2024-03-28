@@ -35,7 +35,7 @@ public class MemberService implements UserDetailsService {
         return this.memberRepository.save(member.toEntity());
     }
 
-    // password 인증
+    // 로그인 검증
     public MemberEntity authenticate(Auth.SignIn member) {
         var user = this.memberRepository.findByUsername(member.getUsername())
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 ID입니다."));

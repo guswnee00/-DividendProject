@@ -5,19 +5,27 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import zerobase.dividendproject.service.MemberService;
 
 import java.util.Date;
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class TokenProvider {
 
     private static final String KEY_ROLES = "roles";
     private static final long TOKEN_EXPIRE_TIME =1000 * 60 * 60;
+
+    private final MemberService memberService;
 
     @Value("${spring.jwt.secret}")
     private String secretKey;
@@ -36,6 +44,11 @@ public class TokenProvider {
                 .setExpiration(expiredDate)   // 토큰 만료 시간
                 .signWith(SignatureAlgorithm.HS512, this.secretKey)   // 사용할 암호화 알고리즘, 비밀키
                 .compact();
+    }
+
+    public Authentication getAuthentication(String jwt) {
+        UserDetails userDetails = this.memberService.loadUserByUsername(this.getUsername(jwt));
+        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
     public String getUsername(String token) {
