@@ -73,11 +73,22 @@ public class CompanyService {
     // trie 사용
     public List<String> autocomplete(String keyword) {
         return (List<String>) this.trie.prefixMap(keyword).keySet()
-                .stream().collect(Collectors.toList());
+                .stream().limit(10).collect(Collectors.toList());
     }
 
-    public void deleteAutocomplete(String keyword) {
+    public void deleteAutocompleteKeyword(String keyword) {
         this.trie.remove(keyword);
+    }
+
+    public String deleteCompany(String ticker) {
+        var company = this.companyRepository.findByTicker(ticker)
+                                            .orElseThrow(() -> new RuntimeException("존재하지 않는 회사입니다."));
+
+        this.dividendRepository.deleteAllByCompanyId(company.getId());
+        this.companyRepository.delete(company);
+
+        this.deleteAutocompleteKeyword(company.getName());
+        return company.getName();
     }
 
 }
