@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -31,7 +32,12 @@ public class SecurityConfiguration {
         http.httpBasic(HttpBasicConfigurer::disable);
         http.csrf(AbstractHttpConfigurer::disable);
         http.sessionManagement((sessionManagement) -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        http.authorizeHttpRequests((authorize) -> authorize.requestMatchers("/auth/signup", "/auth/signin").permitAll());
+        // 수정 전
+        // http.authorizeHttpRequests((authorize) -> authorize.requestMatchers("/auth/signup", "/auth/signin").permitAll());
+        // 수정 후
+        http.authorizeHttpRequests((authorize) -> authorize.requestMatchers("/auth/signup", "/auth/signin").permitAll()
+                                                            .requestMatchers(HttpMethod.GET, "/company").authenticated()
+                                                            .requestMatchers(HttpMethod.POST, "/company").authenticated());
         http.addFilterBefore(this.authenticationFilter, UsernamePasswordAuthenticationFilter.class);
         http.headers((header) -> header.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
         return http.build();
